@@ -3,14 +3,27 @@ import { Card } from "antd";
 function ProductCard({product}) {
     return (
         // Individual product card with image, title, category, and price
-        <Card style={{width: '20%', maxHeight: '400px'}}>
+        <Card style={{
+            flex: '1 1 250px', // card grow and shrink according to window size
+            maxWidth: '300px',
+            minWidth: '200px',
+            height: '500px'
+        }}>
             <div className="product-card">
-                <img src={product.image} alt={product.title} 
-                style={{
-                    width: '100%', 
-                    height: '200px',
-                    objectFit: 'contain'
-                }}/>
+                <div className="image-container" 
+                    style={{
+                        height: '300px', 
+                        display: 'flex', 
+                        alignItems: 'center', 
+                        justifyContent: 'center',
+                    }}>
+                    <img src={product.image} alt={product.title} 
+                        style={{
+                            width: '100%', 
+                            height: '100%',
+                            objectFit: 'contain'
+                        }}/>
+                </div>
                 <div>
                     <h4 className="title"
                         style={{

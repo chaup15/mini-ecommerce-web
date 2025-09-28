@@ -3,9 +3,9 @@ import { createContext, useState, useEffect } from 'react';
 export const ProductContext = createContext();
 
 export function ProductProvider({ children }) {
-    // State to store products and error
     const [products, setProducts] = useState([]);
     const [error, setError] = useState(null);
+    const [category, setCategory] = useState([]);
 
     useEffect(() => {
         const fetchProducts = async () => {
@@ -13,11 +13,11 @@ export function ProductProvider({ children }) {
                 // Fetch products by making API call to FakeStore API
                 const response = await fetch('https://fakestoreapi.com/products');
                 if(!response.ok) {
-                    throw new Error('Failed to fetch product');
+                    setError('Failed to fetch product');
                 }
                 else{
                     const data = await response.json();
-                    console.log(data);
+                    // console.log(data);
                     setProducts(data);
                     /*  Example product structure:
                         category: "men's clothing"
@@ -29,16 +29,35 @@ export function ProductProvider({ children }) {
                         title: "Fjallraven - Foldsack No. 1 Backpack, Fits 15 Laptops"
                     */
                 }
-            } catch (error) {
+            } catch (err) {
                 setError('Failed to fetch products');
             }
         };
 
         fetchProducts();
+
+        const fetchCategory = async () => {
+            try {
+                // Fetch product categories
+                const response = await fetch('https://fakestoreapi.com/products/categories');
+                if(!response.ok) {
+                    setError('Failed to fetch categories');
+                }
+                else{
+                    const data = await response.json();
+                    setCategory(data);
+                }
+            } catch (err) {
+                setError('Failed to fetch categories');
+            }
+        };
+
+        fetchCategory();
+
     }, []);
 
     return (
-        <ProductContext.Provider value={{ products, error, setProducts, setError }}>
+        <ProductContext.Provider value={{ products, error, category, setProducts, setError, setCategory }}>
             {children}
         </ProductContext.Provider>
     );
