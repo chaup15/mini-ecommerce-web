@@ -2,11 +2,13 @@ import { useContext, useState } from 'react';
 import { ProductContext } from '../contexts/productContext';
 import ProductCard from '../components/productCard';
 
-import { Select, Checkbox } from "antd";
+import { Select, Checkbox, AutoComplete } from "antd";
 export default function Homepage() {
     const { products, error, category, setProducts } = useContext(ProductContext);
     const [ categoryChecked, setCategoryChecked] = useState([]);
-    
+    const [ searchValue, setSearchValue ] = useState("");
+    const productTitles = products.map(product => product.title);
+
     if(error) {
         return <div>Error: {error}</div>;
     };
@@ -32,10 +34,41 @@ export default function Homepage() {
         }
         setProducts(sortedProducts);
     };
+
+    // Handles product search
+    const searchProduct = (searchVal) => {
+        setSearchValue(searchVal);
+    }
     
     return (
-        <div className='homepage'>
-            <h1>Our Products</h1>
+        <div className='homepage' 
+            style={{
+                width: '100%',
+                height: '100%'
+            }}>
+            <div className='header'
+                style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                }}>
+                <h1>Our Products</h1>
+                <AutoComplete
+                    style={{ 
+                        width: 500, 
+                        height: 40,
+                        textAlign: 'left',
+                        justifySelf: 'center',
+                        alignSelf: 'center',
+                        margin: '0 0 0 60px'
+                    }}
+                    options={productTitles.map(title => ({ value: title }))}
+                    onChange={searchProduct}
+                    placeholder="Search for a product"
+                    filterOption={(inputValue, option) =>
+                        option.value.toUpperCase().indexOf(inputValue.toUpperCase()) !== -1
+                    }
+                />
+            </div>
             <div className='sort-container' 
                 style={{
                     display: 'flex',
@@ -45,7 +78,7 @@ export default function Homepage() {
                 <Select
                     defaultValue="Default"
                     style={{
-                        width: 100,
+                        width: 150,
                     }}
                     onChange={sortPrice}
                     options={[
@@ -58,25 +91,29 @@ export default function Homepage() {
             
             <div style={{
                 display: 'flex',
-                gap: '30px',
-                justifyContent: 'space-between'
+                flexWrap: 'wrap',
+                justifyContent: 'space-between',
             }}>
-                <div className='categoryFilter'>
+                <div className='category-filter'>
                     <Checkbox.Group options={category} value={categoryChecked} onChange={categoryFilter} 
                         style={{
                             display: 'flex',
+                            width: '150px',
                             flexDirection: 'column',
                         }}/>
                 </div>
                 <div 
                     className='product-grid'
                     style={{
-                        display: 'flex', 
-                        flexWrap: 'wrap',
-                        gap: '16px',
-                        justifyContent: 'center'
+                        display: 'grid', 
+                        gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
+                        gridGap: '15px',
+                        flex: 1,
+                        width: '100%',
                     }}>
-                    {products.filter(product => 
+                    {products.filter(
+                        product => product.title.toLowerCase().includes(searchValue.toLowerCase()) || searchValue === ""
+                    ).filter(product => 
                         categoryChecked.length === 0 || categoryChecked.includes(product.category)
                     ).map(product => (
                         <ProductCard key={product.id} product={product}/>        

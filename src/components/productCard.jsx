@@ -5,9 +5,8 @@ function ProductCard({product}) {
         // Individual product card with image, title, category, and price
         <Card style={{
             flex: '1 1 250px', // card grow and shrink according to window size
-            maxWidth: '300px',
-            minWidth: '200px',
-            height: '500px'
+            width: 'auto',
+            height: 'auto'
         }}>
             <div className="product-card">
                 <div className="image-container" 
