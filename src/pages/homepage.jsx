@@ -1,13 +1,25 @@
-import { useContext, useState } from 'react';
+import { useContext, useState, useEffect } from 'react';
 import { ProductContext } from '../contexts/productContext';
 import ProductCard from '../components/productCard';
 
-import { Select, Checkbox, AutoComplete } from "antd";
+import { Select, Checkbox, AutoComplete, Pagination } from "antd";
 export default function Homepage() {
     const { products, error, category, setProducts } = useContext(ProductContext);
     const [ categoryChecked, setCategoryChecked] = useState([]);
     const [ searchValue, setSearchValue ] = useState("");
+    const [ currentPage, setCurrentPage] = useState(1);
+
     const productTitles = products.map(product => product.title);
+    const pageSize = 8;
+
+    const filteredProducts = products
+    .filter(product => product.title.toLowerCase().includes(searchValue.toLowerCase()) || searchValue === "")
+    .filter(product => categoryChecked.length === 0 || categoryChecked.includes(product.category));
+
+    useEffect(() => {
+        // Reset to first page when filter or search changes
+        setCurrentPage(1); 
+    }, [searchValue, categoryChecked]);
 
     if(error) {
         return <div>Error: {error}</div>;
@@ -38,6 +50,10 @@ export default function Homepage() {
     // Handles product search
     const searchProduct = (searchVal) => {
         setSearchValue(searchVal);
+    }
+
+    const handlePageChange = (page) => {
+        setCurrentPage(page);
     }
     
     return (
@@ -89,7 +105,7 @@ export default function Homepage() {
                 />
             </div>
             
-            <div style={{
+            <div className='main' style={{
                 display: 'flex',
                 flexWrap: 'wrap',
                 justifyContent: 'space-between',
@@ -108,19 +124,30 @@ export default function Homepage() {
                         display: 'grid', 
                         gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
                         gridGap: '15px',
-                        flex: 1,
+                        flex: 1, // fill available space
                         width: '100%',
                     }}>
-                    {products.filter(
-                        product => product.title.toLowerCase().includes(searchValue.toLowerCase()) || searchValue === ""
-                    ).filter(product => 
-                        categoryChecked.length === 0 || categoryChecked.includes(product.category)
+
+                    {filteredProducts.slice(
+                        (currentPage - 1) * pageSize, currentPage * pageSize
                     ).map(product => (
                         <ProductCard key={product.id} product={product}/>        
                     ))}
                 </div>
             </div>
-            
+            <div className='pagination'
+                style={{
+                    display: 'flex',
+                    justifyContent: 'center',
+                    marginTop: '20px'
+                }}>
+                <Pagination 
+                    current={currentPage} 
+                    total={filteredProducts.length} 
+                    pageSize={pageSize} 
+                    onChange={handlePageChange}
+                />
+            </div>
         </div>
     )
 }

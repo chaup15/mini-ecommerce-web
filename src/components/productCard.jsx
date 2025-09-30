@@ -34,7 +34,7 @@ function ProductCard({product}) {
                         }}>
                     {product.title}</h4>
                     <p className="category">{product.category}</p>
-                    <p className="price">${product.price}</p>
+                    <p className="price">${product.price.toFixed(2)}</p>
                 </div>
             </div>
         </Card>
