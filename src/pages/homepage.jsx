@@ -1,4 +1,5 @@
 import { useContext, useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { ProductContext } from '../contexts/productContext';
 import ProductCard from '../components/productCard';
 
@@ -131,7 +132,7 @@ export default function Homepage() {
                     {filteredProducts.slice(
                         (currentPage - 1) * pageSize, currentPage * pageSize
                     ).map(product => (
-                        <ProductCard key={product.id} product={product}/>        
+                        <Link to={`/products/${product.id}`}><ProductCard key={product.id} product={product}/></Link>     
                     ))}
                 </div>
             </div>
