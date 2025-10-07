@@ -3,24 +3,33 @@ import { Link } from 'react-router-dom';
 import { ProductContext } from '../contexts/productContext';
 import ProductCard from '../components/productCard';
 
-import { Select, Checkbox, AutoComplete, Pagination } from "antd";
+import { Select, Checkbox, Pagination } from "antd";
 export default function Homepage() {
-    const { products, error, category, setProducts } = useContext(ProductContext);
+    const { products, error, category, setProducts, searchValue } = useContext(ProductContext);
     const [ categoryChecked, setCategoryChecked] = useState([]);
-    const [ searchValue, setSearchValue ] = useState("");
     const [ currentPage, setCurrentPage] = useState(1);
 
-    const productTitles = products.map(product => product.title);
     const pageSize = 8;
 
+    // Products searched by title, category, or description
     const filteredProducts = products
-    .filter(product => product.title.toLowerCase().includes(searchValue.toLowerCase()) || searchValue === "")
-    .filter(product => categoryChecked.length === 0 || categoryChecked.includes(product.category));
+    .filter(
+        product => product.title.toLowerCase().includes(searchValue.toLowerCase()) || searchValue === "" 
+        || product.category.toLowerCase().includes(searchValue.toLowerCase()) || product.description.toLowerCase().includes(searchValue.toLowerCase())
+    )
+    .filter(
+        product => categoryChecked.length === 0 || categoryChecked.includes(product.category)
+    );
 
     useEffect(() => {
         // Reset to first page when filter or search changes
         setCurrentPage(1); 
     }, [searchValue, categoryChecked]);
+
+    useEffect(() => {
+        // Reset category filter when search value changes
+        setCategoryChecked([]);
+    }, [searchValue]);
 
     if(error) {
         return <div>Error: {error}</div>;
@@ -48,11 +57,6 @@ export default function Homepage() {
         setProducts(sortedProducts);
     };
 
-    // Handles product search
-    const searchProduct = (searchVal) => {
-        setSearchValue(searchVal);
-    }
-
     const handlePageChange = (page) => {
         setCurrentPage(page);
     }
@@ -63,29 +67,6 @@ export default function Homepage() {
                 width: '100%',
                 height: '100%'
             }}>
-            <div className='header'
-                style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                }}>
-                <h1>Our Products</h1>
-                <AutoComplete
-                    style={{ 
-                        width: 500, 
-                        height: 40,
-                        textAlign: 'left',
-                        justifySelf: 'center',
-                        alignSelf: 'center',
-                        margin: '0 0 0 60px'
-                    }}
-                    options={productTitles.map(title => ({ value: title }))}
-                    onChange={searchProduct}
-                    placeholder="Search for a product"
-                    filterOption={(inputValue, option) =>
-                        option.value.toUpperCase().indexOf(inputValue.toUpperCase()) !== -1
-                    }
-                />
-            </div>
             <div className='sort-container' 
                 style={{
                     display: 'flex',
