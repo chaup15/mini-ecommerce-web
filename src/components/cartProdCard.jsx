@@ -1,6 +1,6 @@
 import { Card, InputNumber, Button } from 'antd';
 import { Link } from 'react-router-dom';
-import { useContext, useState } from 'react';
+import { useContext, useState, useEffect } from 'react';
 
 import { CartContext } from '../contexts/cartContext'
 
@@ -17,6 +17,11 @@ export default function CartProdCard({cartProd}) {
         setQuantity(newQuantity);
         updateQuantity(id, newQuantity);
     }
+
+    // Makes sure quantity displayed reflect quantity in database
+    useEffect(() => {
+        setQuantity(cartProd.quantity);
+      }, [cartProd.quantity]);
 
     return (
         // Individual cart item card with image, title, price, and quantity

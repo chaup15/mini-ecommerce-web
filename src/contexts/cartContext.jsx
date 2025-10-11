@@ -75,6 +75,48 @@ export function CartProvider({ children }) {
         }
     }
 
+    // Add new item to cart if product does not already exist in cart
+    // Otherwise, update quantity in cart if product already added to cart
+    const addToCart = async (id, quantity) => {
+        try{
+            const existingProduct = cart.products.findIndex(item => item.productId === id);
+            
+            let updatedCart;
+            if(existingProduct !== -1){ //if product exists, add old and new quantity
+                updatedCart = {
+                    ...cart,
+                    products: cart.products.map(item => 
+                        item.productId === id ? {...item, quantity: item.quantity + quantity} : item 
+                    )
+                }
+            }
+            else{
+                updatedCart = {
+                    ...cart,
+                    products: [...cart.products, { productId: id, quantity: quantity }]
+                }
+            }
+            
+            // FakeStoreAPI POST does not actually insert new cart into database 
+            // Hence using PUT to update the existing cart 
+            const response = await fetch(`https://fakestoreapi.com/carts/1`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(updatedCart)
+            })
+
+            if(!response.ok) {
+                throw new Error ('Failed to add to cart');
+            }
+            else {
+                const data = await response.json();
+                setCart(data);
+            }
+        } catch(err) {
+            throw new Error (err);
+        }
+    }
+
     useEffect(() => {
         fetchCart();
     }, []);
@@ -84,7 +126,7 @@ export function CartProvider({ children }) {
     }, [cart]);
 
     return (
-        <CartContext.Provider value={{ cart, cartProducts, setCart, setCartProducts, updateQuantity }}>
+        <CartContext.Provider value={{ cart, cartProducts, setCart, setCartProducts, addToCart, updateQuantity  }}>
             {children}
         </CartContext.Provider>
     );
