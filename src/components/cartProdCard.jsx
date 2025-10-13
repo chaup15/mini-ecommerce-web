@@ -25,9 +25,7 @@ export default function CartProdCard({cartProd}) {
 
     return (
         // Individual cart item card with image, title, price, and quantity
-        <Card style={{
-            width: '70%'
-        }}>
+        <Card>
             <div className="cart-item-card" style={{
                 display: 'flex',
                 flexDirection: 'row',
