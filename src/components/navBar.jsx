@@ -4,7 +4,7 @@ import { ProductContext } from '../contexts/productContext'
 import { CartContext } from '../contexts/cartContext';
 import { Input, Badge, Avatar } from 'antd';
 import cartLogo from '../assets/cart.svg';
-
+import userLogo from '../assets/user.svg';
 
 export default function NavBar() {
     const { setSearchValue } = useContext(ProductContext);
@@ -44,11 +44,37 @@ export default function NavBar() {
                 }}
             />
             </div>
-            <div className='buttons'>
-                <Link to={`cart`} reloadDocument>
+            <div className='buttons'
+                style={{
+                    display: 'flex',
+                    gap: 10
+                }}
+            >
+                <Link to={`/signin`} reloadDocument
+                    style={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        color: 'inherit',
+                        fontSize: '0.7em'
+                    }}
+                >
+                    <Avatar src={userLogo} shape="round" size="middle" />
+                    <span>Sign In</span>
+                </Link>
+                <Link to={`/cart`} reloadDocument
+                    style={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        color: 'inherit',
+                        fontSize: '0.7em'
+                    }}
+                >
                     <Badge count={cartProducts.length}>
                         <Avatar src={cartLogo} shape="round" size="middle" />
                     </Badge>
+                    <span>Cart</span>
                 </Link>
             </div>
             
