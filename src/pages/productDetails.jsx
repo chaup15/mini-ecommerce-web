@@ -3,7 +3,7 @@ import { useEffect, useState, useContext } from 'react';
 
 import Rating from 'react-rating';
 import starLogo from '../assets/star.svg';
-import { InputNumber, Button } from 'antd';
+import { InputNumber, Button, Modal } from 'antd';
 import { CartContext } from '../contexts/cartContext';
 import { useNavigate } from 'react-router-dom';
 
@@ -13,10 +13,20 @@ export default function ProductDetails() {
     const [ quantity, setQuantity ] = useState(1);
     const { addToCart } = useContext(CartContext);
     const navigate = useNavigate();
+    const [openModal, setOpenModal] = useState(false);
+
+    const handleViewCart = () => {
+        setOpenModal(false);
+        navigate('/cart');
+    };
+    
+    const handleCancel = () => {
+        setOpenModal(false);
+    };
 
     const handleAddToCart = (id, quantity) => {
         addToCart(id, quantity);
-        navigate('/cart');
+        setOpenModal(true);
     }
 
     useEffect(() => {
@@ -134,6 +144,22 @@ export default function ProductDetails() {
                             }}
                             onClick={() => handleAddToCart(productDetails.id, quantity)}
                         >Add to Cart</Button>
+                        <Modal
+                            title="Added to Your Cart"
+                            closable={{ 'aria-label': 'Custom Close Button' }}
+                            open={openModal}
+                            onCancel={handleCancel}
+                            footer={[
+                                <Button key="back" onClick={handleCancel}>
+                                    Continue Shopping
+                                </Button>,
+                                <Button key="submit" type="primary" onClick={handleViewCart}>
+                                    View Cart
+                                </Button>
+                            ]}
+                        >
+                            <p><b>{productDetails.title}</b> successfully added to your cart</p>   
+                        </Modal>
                     </div>
                 </div>
                 
