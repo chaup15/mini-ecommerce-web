@@ -117,6 +117,33 @@ export function CartProvider({ children }) {
         }
     }
 
+    const removeFromCart = async (id) => {
+        const prevCart = {...cart}; // Current state of cart
+
+        try {
+            const updatedCart = {
+                ...cart,
+                products: cart.products.filter(item => item.productId !== id)
+            }
+
+            setCart(updatedCart); // Update cart before API call to update UI immediately
+            
+            const response = await fetch(`https://fakestoreapi.com/carts/1`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(updatedCart)
+            })
+
+            if(!response.ok) {
+                throw new Error ('Failed to remove item from cart');
+            }
+
+        } catch(err) {
+            setCart(prevCart); // If error, set cart to original state before removing
+            throw new Error ('Failed to remove item from cart');
+        }
+    }
+
     useEffect(() => {
         fetchCart();
     }, []);
@@ -126,7 +153,7 @@ export function CartProvider({ children }) {
     }, [cart]);
 
     return (
-        <CartContext.Provider value={{ cart, cartProducts, setCart, setCartProducts, addToCart, updateQuantity  }}>
+        <CartContext.Provider value={{ cart, cartProducts, setCart, setCartProducts, addToCart, updateQuantity, removeFromCart  }}>
             {children}
         </CartContext.Provider>
     );
