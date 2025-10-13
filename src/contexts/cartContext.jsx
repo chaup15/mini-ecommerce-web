@@ -8,31 +8,6 @@ export function CartProvider({ children }) {
     const [cart, setCart] = useState([]);
     const [cartProducts, setCartProducts] = useState([]);
 
-    const fetchCart = async () => {
-        try {
-            //Fetch single cart using userId 1 as example
-            const response = await fetch(`https://fakestoreapi.com/carts/1`);
-            if(!response.ok) {
-                throw new Error('Failed to fetch cart');
-            } else {
-                const data = await response.json();
-                /*  Cart structure example
-                    date: "2020-03-02T00:00:00.000Z"
-                    id: 1
-                    products: Array(3)
-                        0: {productId: 1, quantity: 4}
-                        1: {productId: 2, quantity: 1}
-                        2: {productId: 3, quantity: 6}
-                        length: 3
-                    userId: 1
-                */
-                setCart(data);
-            }
-        } catch (err) {
-            throw new Error(err);
-        }
-    }
-
     // Get product details from products data using product id  
     // since cart only contain product id and quantity
     // Function copies product details and add quantity info
@@ -49,38 +24,28 @@ export function CartProvider({ children }) {
         }
     }
 
-    const updateQuantity = async (id, newQuantity) => {
-        try{
-            const updatedCart = {
-                ...cart,
-                products: cart.products.map(item => 
-                    item.productId === id ? {...item, quantity: newQuantity} : item 
-                )
-            }
-            const response = await fetch(`https://fakestoreapi.com/carts/1`, {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(updatedCart)
-            })
-
-            if(!response.ok) {
-                throw new Error ('Failed to update cart quantity');
-            }
-            else {
-                const data = await response.json();
-                setCart(data);
-            }
-        } catch(err) {
-            throw new Error (err);
+    const updateQuantity = (id, newQuantity) => {
+        const updatedCart = {
+            ...cart,
+            products: cart.products.map(item => 
+                item.productId === id ? {...item, quantity: newQuantity} : item 
+            )
         }
+        setCart(updatedCart);
     }
 
     // Add new item to cart if product does not already exist in cart
     // Otherwise, update quantity in cart if product already added to cart
-    const addToCart = async (id, quantity) => {
-        try{
-            const existingProduct = cart.products.findIndex(item => item.productId === id);
-            
+    const addToCart = (id, quantity) => {
+        if(cart.length === 0) {
+            const newCart = {
+                products: [{productId: id, quantity: quantity}],
+            }
+            setCart(newCart);
+        }
+        else{
+            const existingProduct = cart?.products ? cart.products.findIndex(item => item.productId === id) : -1;
+        
             let updatedCart;
             if(existingProduct !== -1){ //if product exists, add old and new quantity
                 updatedCart = {
@@ -96,61 +61,32 @@ export function CartProvider({ children }) {
                     products: [...cart.products, { productId: id, quantity: quantity }]
                 }
             }
-            
-            // FakeStoreAPI POST does not actually insert new cart into database 
-            // Hence using PUT to update the existing cart 
-            const response = await fetch(`https://fakestoreapi.com/carts/1`, {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(updatedCart)
-            })
-
-            if(!response.ok) {
-                throw new Error ('Failed to add to cart');
-            }
-            else {
-                const data = await response.json();
-                setCart(data);
-            }
-        } catch(err) {
-            throw new Error (err);
+            setCart(updatedCart);
         }
     }
 
-    const removeFromCart = async (id) => {
-        const prevCart = {...cart}; // Current state of cart
-
-        try {
-            const updatedCart = {
-                ...cart,
-                products: cart.products.filter(item => item.productId !== id)
-            }
-
-            setCart(updatedCart); // Update cart before API call to update UI immediately
-            
-            const response = await fetch(`https://fakestoreapi.com/carts/1`, {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(updatedCart)
-            })
-
-            if(!response.ok) {
-                throw new Error ('Failed to remove item from cart');
-            }
-
-        } catch(err) {
-            setCart(prevCart); // If error, set cart to original state before removing
-            throw new Error ('Failed to remove item from cart');
+    const removeFromCart = (id) => {
+        const updatedCart = {
+            ...cart,
+            products: cart.products.filter(item => item.productId !== id)
         }
+
+        setCart(updatedCart);
     }
 
     useEffect(() => {
-        fetchCart();
+        const localCart = localStorage.getItem('cart');
+        if(localCart !== 'undefined') {
+            setCart(JSON.parse(localCart));
+        }
     }, []);
 
     useEffect(() => {
-        getProdInCart();
-    }, [cart]);
+        if(cart?.products){
+            localStorage.setItem('cart', JSON.stringify(cart));
+            getProdInCart();
+        }
+    }, [cart, products]);
 
     return (
         <CartContext.Provider value={{ cart, cartProducts, setCart, setCartProducts, addToCart, updateQuantity, removeFromCart  }}>
