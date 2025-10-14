@@ -2,15 +2,32 @@ import { Link, useNavigate } from 'react-router-dom'
 import { useContext, useState } from 'react'
 import { ProductContext } from '../contexts/productContext'
 import { CartContext } from '../contexts/cartContext';
-import { Input, Badge, Avatar } from 'antd';
+import { AuthContext } from '../contexts/authContext';
+import { Input, Badge, Avatar, Dropdown } from 'antd';
 import cartLogo from '../assets/cart.svg';
-
+import userLogo from '../assets/user.svg';
 
 export default function NavBar() {
     const { setSearchValue } = useContext(ProductContext);
     const { cartProducts } = useContext(CartContext);
+    const { token, handleSignOut } = useContext(AuthContext);
     const [ searchInput, setSearchInput ] = useState("");
     const navigate = useNavigate();
+
+    const items = [
+        {
+          label: 'Sign Out',
+          key: '1',
+        },    
+    ];
+
+    const onClick = ({ key }) => {
+        if(key === '1') {
+            console.log('Clicked sign out');
+            handleSignOut();
+            navigate('/');
+        }
+    };
 
     return (
         <div className='navbar' style = {{
@@ -44,11 +61,54 @@ export default function NavBar() {
                 }}
             />
             </div>
-            <div className='buttons'>
-                <Link to={`cart`} reloadDocument>
+            <div className='buttons'
+                style={{
+                    display: 'flex',
+                    gap: 10
+                }}
+            >
+                {token ? (
+                    <Dropdown menu={{ items, onClick }} placement="bottom">
+                        <Link to={`/`} reloadDocument
+                            style={{
+                                display: 'flex',
+                                flexDirection: 'column',
+                                alignItems: 'center',
+                                color: 'inherit',
+                                fontSize: '0.7em'
+                            }}
+                        >
+                            <Avatar src={userLogo} shape="round" size="middle" />
+                            <span>Account</span>
+                        </Link>
+                    </Dropdown>
+                ) : (
+                <Link to={`/signin`} reloadDocument
+                    style={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        color: 'inherit',
+                        fontSize: '0.7em'
+                    }}
+                >
+                    <Avatar src={userLogo} shape="round" size="middle" />
+                    <span>Sign In</span>
+                </Link>
+                )}
+                <Link to={`/cart`} reloadDocument
+                    style={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        color: 'inherit',
+                        fontSize: '0.7em'
+                    }}
+                >
                     <Badge count={cartProducts.length}>
                         <Avatar src={cartLogo} shape="round" size="middle" />
                     </Badge>
+                    <span>Cart</span>
                 </Link>
             </div>
             
