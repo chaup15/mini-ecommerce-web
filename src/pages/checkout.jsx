@@ -1,19 +1,16 @@
 import { Button, Form, Input, Card, Modal } from "antd";
-import { useState, useContext, use } from "react";
+import { useState, useContext, useEffect } from "react";
 import { CartContext } from '../contexts/cartContext';
 import CheckoutItemCard from "../components/checkoutItemCard";
 import { useNavigate } from "react-router-dom";
 
 export default function Checkout() {
     const [canCheckout, setCanCheckout] = useState(false); // Flag to enable and disable checkout button
+    const [checkoutComplete, setCheckoutComplete] = useState(false); 
     const { cartProducts, cartCheckout } = useContext(CartContext);
     const total = cartProducts.reduce((sum, prod) => sum + (prod.price * prod.quantity), 0);
     const [openModal, setOpenModal] = useState(false);
     const navigate = useNavigate();
-
-    if(cartProducts.length === 0) {
-        navigate('/');
-    }
 
     const handleClose = () => {
         setOpenModal(false);
@@ -24,9 +21,18 @@ export default function Checkout() {
         const cartId = await cartCheckout();
         if(cartId !== null) {
             setOpenModal(true);
+            setCheckoutComplete(true);
             setCanCheckout(false);
         }
     }
+
+    useEffect(() => {
+        // In case user refreshes page after successfully checking out
+        // Still redirect to homepage since cart is empty
+        if(cartProducts.length === 0 && !checkoutComplete) {
+            navigate('/');
+        }
+    }, [cartProducts, checkoutComplete])
 
     return (
         <div className='content' 

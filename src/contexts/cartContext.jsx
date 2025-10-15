@@ -92,6 +92,8 @@ export function CartProvider({ children }) {
             else {
                 const data = await response.json();
                 localStorage.removeItem('cart');
+                setCartProducts([]);
+                setCart([]);
                 return data.id
             }
         } catch (err) {
