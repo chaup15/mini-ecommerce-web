@@ -1,13 +1,28 @@
-import { useContext } from 'react';
+import { use, useContext } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 import { CartContext } from '../contexts/cartContext';
 import CartProdCard from '../components/cartProdCard';
-import { Card } from 'antd';
+import { Card, Button } from 'antd';
+import { AuthContext } from '../contexts/authContext';
 
 export default function Cart() {
     const { cartProducts } = useContext(CartContext);
     const total = cartProducts.reduce((sum, prod) => sum + (prod.price * prod.quantity), 0);
     console.log(cartProducts);
+
+    const { token } = useContext(AuthContext);
+    const navigate = useNavigate();
+
+    const onClickCheckout = () => {
+        console.log(token);
+        if(token) {
+            navigate('/checkout');
+        }
+        else {
+            navigate('/signin');
+        }
+    }
 
     return (
         <div className='content' 
@@ -44,7 +59,7 @@ export default function Cart() {
             )}
                 <div className='cart-summary'
                     style={{
-                        width: '30%'
+                        width: '30%',
                     }}    
                 >
                     <Card>
@@ -52,13 +67,26 @@ export default function Cart() {
                             style={{
                                 display: 'flex',
                                 flexDirection: 'row',
-                                justifyContent: 'space-between'
+                                justifyContent: 'space-between',
                             }}
                         >
                             <h3>Total:</h3>
                             <h3>${total.toFixed(2)}</h3>
                         </div>
                     </Card>
+                    {cartProducts.length !== 0 && (
+                    // Show Checkout button only when there are items in cart
+                    <Button 
+                        block 
+                        variant='solid' 
+                        color='default'
+                        onClick={onClickCheckout}
+                        style={{
+                            marginTop: 20,
+                            height: 50
+                        }}
+                    >Proceed to Checkout</Button>
+                    )}
                 </div>
             </div>
         </div>

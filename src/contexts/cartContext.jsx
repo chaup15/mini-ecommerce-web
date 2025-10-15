@@ -37,7 +37,7 @@ export function CartProvider({ children }) {
     // Add new item to cart if product does not already exist in cart
     // Otherwise, update quantity in cart if product already added to cart
     const addToCart = (id, quantity) => {
-        if(cart.length === 0) {
+        if(cart === null || cart.length === 0) {
             const newCart = {
                 products: [{productId: id, quantity: quantity}],
             }
@@ -74,6 +74,33 @@ export function CartProvider({ children }) {
         setCart(updatedCart);
     }
 
+    // Empty cart after successfully checking out
+    // Return id of checkout cart if successful
+    // Otherwise, return null
+    const cartCheckout = async () => {
+        try {
+            const response = await fetch('https://fakestoreapi.com/carts', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(cart)
+            })
+
+            if(!response.ok) {
+                console.error('Failed to checkout');
+                return null;
+            }
+            else {
+                const data = await response.json();
+                localStorage.removeItem('cart');
+                setCartProducts([]);
+                setCart([]);
+                return data.id
+            }
+        } catch (err) {
+            console.error('Failed to checkout');
+        }
+    }
+
     useEffect(() => {
         const localCart = localStorage.getItem('cart');
         if(localCart !== 'undefined') {
@@ -89,7 +116,7 @@ export function CartProvider({ children }) {
     }, [cart, products]);
 
     return (
-        <CartContext.Provider value={{ cart, cartProducts, setCart, setCartProducts, addToCart, updateQuantity, removeFromCart  }}>
+        <CartContext.Provider value={{ cart, cartProducts, setCart, setCartProducts, addToCart, updateQuantity, removeFromCart, cartCheckout }}>
             {children}
         </CartContext.Provider>
     );

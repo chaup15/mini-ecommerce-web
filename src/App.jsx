@@ -5,6 +5,7 @@ import ProductDetails from './pages/productDetails'
 import NavBar from './components/navBar'
 import Cart from './pages/cart'
 import SignIn from './pages/signIn'
+import Checkout from './pages/checkout'
 
 function App() {
 
@@ -16,6 +17,7 @@ function App() {
           <Route path="/products/:id" element={<ProductDetails />} />
           <Route path="/cart" element={<Cart />}/>
           <Route path="/signin" element={<SignIn />}/>
+          <Route path="/checkout" element={<Checkout />}/>
         </Routes>
     </Router>
   )
