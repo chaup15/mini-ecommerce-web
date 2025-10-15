@@ -1,12 +1,32 @@
-import { Button, Form, Input, Card } from "antd";
-import { useState, useContext } from "react";
+import { Button, Form, Input, Card, Modal } from "antd";
+import { useState, useContext, use } from "react";
 import { CartContext } from '../contexts/cartContext';
 import CheckoutItemCard from "../components/checkoutItemCard";
+import { useNavigate } from "react-router-dom";
 
 export default function Checkout() {
-    const [canCheckout, setCanCheckout] = useState(false);
-    const { cartProducts } = useContext(CartContext);
+    const [canCheckout, setCanCheckout] = useState(false); // Flag to enable and disable checkout button
+    const { cartProducts, cartCheckout } = useContext(CartContext);
     const total = cartProducts.reduce((sum, prod) => sum + (prod.price * prod.quantity), 0);
+    const [openModal, setOpenModal] = useState(false);
+    const navigate = useNavigate();
+
+    if(cartProducts.length === 0) {
+        navigate('/');
+    }
+
+    const handleClose = () => {
+        setOpenModal(false);
+        navigate('/');
+    };
+
+    const handleCheckout = async () => {
+        const cartId = await cartCheckout();
+        if(cartId !== null) {
+            setOpenModal(true);
+            setCanCheckout(false);
+        }
+    }
 
     return (
         <div className='content' 
@@ -25,7 +45,7 @@ export default function Checkout() {
                         name="delivery-info"
                         initialValues={{ remember: true }}
                         validateMessages={{ required: 'Required', types: { email: 'Invalid email' } }}
-                        onFinish={() => setCanCheckout(true)}
+                        onFinish={() => setCanCheckout(true)} //Allow checkout button only after required info are filled
                     >   
                         <Form.Item name={['user', 'firstname']} rules={[{ required: true }]}>
                             <Input placeholder="First Name*"/>
@@ -72,8 +92,26 @@ export default function Checkout() {
                     block
                     style={{height: 50}}
                     disabled={!canCheckout}
+                    onClick={handleCheckout}
                 >Check Out</Button>
             </div>
+            <Modal
+                closable={false}
+                maskClosable={false}
+                open={openModal}
+                afterClose={handleClose}
+                centered={true}
+                style={{textAlign: 'center'}}
+                footer={[
+                    <div style={{ display: 'flex', justifyContent: 'center' }}>
+                        <Button key="submit" type="primary" onClick={handleClose} style={{textAlign: 'center'}}>
+                            Return Home
+                        </Button>
+                    </div>
+                ]}
+            >
+                <p>Thank you! Your order has been successfully placed. 🎉</p>   
+            </Modal>
         </div>
     );
 }
