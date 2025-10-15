@@ -74,6 +74,8 @@ export default function Cart() {
                             <h3>${total.toFixed(2)}</h3>
                         </div>
                     </Card>
+                    {cartProducts.length !== 0 && (
+                    // Show Checkout button only when there are items in cart
                     <Button 
                         block 
                         variant='solid' 
@@ -84,6 +86,7 @@ export default function Cart() {
                             height: 50
                         }}
                     >Proceed to Checkout</Button>
+                    )}
                 </div>
             </div>
         </div>
